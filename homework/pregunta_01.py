@@ -4,7 +4,9 @@
 """
 Escriba el codigo que ejecute la accion solicitada en cada pregunta.
 """
-
+import os
+import zipfile
+import pandas as pd
 
 def pregunta_01():
     """
@@ -71,3 +73,28 @@ def pregunta_01():
 
 
     """
+
+    input_zip_path = 'files/input.zip'
+    input_dir = 'files/input'
+    output_dir = 'files/output'
+
+    with zipfile.ZipFile(input_zip_path, 'r') as zip_ref:
+        zip_ref.extractall('files')  # Extrae en la carpeta "files"
+
+    for split in ['train', 'test']:
+        data = []
+        split_dir = os.path.join(input_dir, split)
+        for sentiment in ['positive', 'negative', 'neutral']:
+            sentiment_dir = os.path.join(split_dir, sentiment)
+
+            for file_name in os.listdir(sentiment_dir):
+                file_path = os.path.join(sentiment_dir, file_name)
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    text = f.read().strip()
+                data.append({'phrase': text, 'target': sentiment})
+
+        os.makedirs(output_dir, exist_ok=True)
+        output_file = os.path.join(output_dir, f"{split}_dataset.csv")
+        pd.DataFrame(data).to_csv(output_file, index=False)
+
+pregunta_01()
